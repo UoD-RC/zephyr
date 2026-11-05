@@ -1,0 +1,160 @@
+/*
+ * Copyright (c) 2026 Microchip Technology Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <dt-bindings/pic32c/pic32ck_sg_gc/pic32ck_sg01/pic32ck2051sg01144-pinctrl.h>
+
+&pinctrl {
+	sercom1_uart_default: sercom1_uart_default {
+		group1 {
+			pinmux = <PD13C_SERCOM1_PAD0>,
+				 <PD14C_SERCOM1_PAD1>;
+		};
+	};
+
+	sercom2_spi_default: sercom2_spi_default {
+		group1 {
+			pinmux = <PC15C_SERCOM2_PAD0>,
+				 <PC18C_SERCOM2_PAD3>,
+				 <PC17C_SERCOM2_PAD2>,
+				 <PC16C_SERCOM2_PAD1>;
+		};
+	};
+
+	sercom3_uart_default: sercom3_uart_default {
+		group1 {
+			pinmux = <PB21C_SERCOM3_PAD0>,
+				 <PB22C_SERCOM3_PAD1>;
+		};
+	};
+
+	sercom4_i2c_default: sercom4_i2c_default {
+		group1 {
+			pinmux = <PB9C_SERCOM4_PAD0>,
+				 <PB10C_SERCOM4_PAD1>;
+		};
+	};
+
+	sercom5_uart_default: sercom5_uart_default {
+		group1 {
+			pinmux = <PA25C_SERCOM5_PAD1>,
+				 <PA24C_SERCOM5_PAD0>;
+		};
+	};
+
+	/* CAN0 pinctrl - PB16=TX, PB17=RX per user guide */
+	can0_default: can0_default {
+		group1 {
+			pinmux = <PB16H_CAN0_TX>,
+				 <PB17H_CAN0_RX>;
+		};
+	};
+
+	sercom2_spi_ext1: sercom2_spi_ext1 {
+		group1 {
+			pinmux = <PC15C_SERCOM2_PAD0>,
+				 <PC16C_SERCOM2_PAD1>,
+				 <PC17C_SERCOM2_PAD2>;
+		};
+
+		group2 {
+			pinmux = <PD15_GPIO>;
+		};
+	};
+
+	sercom2_spi_ext2: sercom2_spi_ext2 {
+		group1 {
+			pinmux = <PC15C_SERCOM2_PAD0>,
+				 <PC16C_SERCOM2_PAD1>,
+				 <PC17C_SERCOM2_PAD2>;
+		};
+
+		group2 {
+			pinmux = <PC23_GPIO>;
+		};
+	};
+
+	sercom2_spi_arduino: sercom2_spi_arduino {
+		group1 {
+			pinmux = <PC15C_SERCOM2_PAD0>,
+				 <PC16C_SERCOM2_PAD1>,
+				 <PC17C_SERCOM2_PAD2>;
+		};
+
+		group2 {
+			pinmux = <PB12_GPIO>;
+		};
+	};
+
+	sercom2_spi_mikrobus: sercom2_spi_mikrobus {
+		group1 {
+			pinmux = <PC15C_SERCOM2_PAD0>,
+				 <PC16C_SERCOM2_PAD1>,
+				 <PC17C_SERCOM2_PAD2>;
+		};
+
+		group2 {
+			pinmux = <PD15_GPIO>;
+		};
+	};
+
+	sercom_audio_spi: sercom_audio_spi {
+		group1 {
+			pinmux = <PD16J_SPI_IXS_SDI>,
+				 <PD17J_SPI_IXS_SDO>,
+				 <PD14J_SPI_IXS_SCK>,
+				 <PD13J_SPI_IXS_FSYNC>;
+		};
+	};
+
+	sercom4_spi_default: sercom4_spi_default {
+		group1 {
+			pinmux = <PB9C_SERCOM4_PAD0>,
+				 <PB6C_SERCOM4_PAD3>,
+				 <PB13C_SERCOM4_PAD2>,
+				 <PB10C_SERCOM4_PAD1>;
+		};
+	};
+
+	usb_dc_default: usb_dc_default {
+		group1 {
+			pinmux = <PD4H_USB_DP>,
+				 <PD3H_USB_DM>;
+		};
+	};
+
+	mdio_default: mdio_default {
+		group1 {
+			pinmux = <PC3L_ETH_MDC>,
+				 <PC4L_ETH_MDIO>;
+		};
+	};
+
+	gmac_rmii: gmac_rmii {
+		group1 {
+			pinmux = <PC0L_ETH_TX_CLK>,
+				 <PC11L_ETH_TXEN>,
+				 <PC12L_ETH_TXD0>,
+				 <PC13L_ETH_TXD1>,
+				 <PC10L_ETH_RXDV>,
+				 <PC7L_ETH_RXD0>,
+				 <PC6L_ETH_RXD1>,
+				 <PC9L_ETH_RXER>;
+		};
+	};
+
+	sdhc0_default: sdmmc0_default {
+		group1 {
+			pinmux = <PD10I_SDMMC0_SDCK>,
+				 <PD6I_SDMMC0_SDCMD>,
+				 <PD7I_SDMMC0_SDDAT0>,
+				 <PD11I_SDMMC0_SDDAT1>,
+				 <PD8I_SDMMC0_SDDAT2>,
+				 <PD9I_SDMMC0_SDDAT3>,
+				 <PD12I_SDMMC0_SDCD>,
+				 <PD5I_SDMMC0_SDWP>;
+		};
+	};
+};

@@ -37,6 +37,13 @@
 #error "Library does not support the specified device."
 #endif
 
+#include "pic32ck_sg_gc.h"
+
+/* Compatibility alias for the released Microchip HAL SERCOM register names. */
+#ifndef SERCOM_USART_CTRLA_SWRST_Msk
+#define SERCOM_USART_CTRLA_SWRST_Msk SERCOM_USART_INT_CTRLA_SWRST_Msk
+#endif
+
 #endif /* _ASMLANGUAGE */
 
 #endif /* SOC_MICROCHIP_PIC32CK_SG01_H_ */

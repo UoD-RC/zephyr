@@ -7,10 +7,15 @@ type: mcu
 arch: arm
 toolchain:
   - zephyr
-flash: 2032
+flash: 2048
 ram: 512
 supported:
   - clock_control
+  - entropy
+  - flash
+  - i2c
+  - netif:eth
+  - uart
   - gpio
   - pinctrl
 vendor: microchip

@@ -7,6 +7,8 @@
 /dts-v1/;
 #include <microchip/pic32c/pic32ck_sg_gc/pic32ck_sg01/pic32ck2051sg01144.dtsi>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <zephyr/dt-bindings/i2c/i2c.h>
+#include "pic32ck_sg01_cult-pinctrl.dtsi"
 
 / {
 	model = "PIC32CK SG01 Curiosity Ultra";
@@ -14,8 +16,14 @@
 
 	chosen {
 		zephyr,sram = &sram0;
-		zephyr,flash = &flash1;
-		zephyr,code-partition = &code_partition;
+		zephyr,flash = &flash0;
+		zephyr,flash-controller = &nvmctrl;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,console = &sercom5;
+		zephyr,shell-uart = &sercom5;
+		zephyr,canbus = &can0;
+		zephyr,entropy = &trng;
+		zephyr,sdhc = &sdhc0;
 	};
 
 	aliases {
@@ -23,18 +31,21 @@
 		led1 = &led1;
 		sw0 = &button0;
 		sw1 = &button1;
+		spi0 = &sercom2;
+		i2c0 = &sercom4;
+		sdhc0 = &sdhc0;
 	};
 
 	leds {
 		compatible = "gpio-leds";
 
 		led0: led_0 {
-			gpios = <&portd 20 GPIO_ACTIVE_LOW>;
+			gpios = <&portd_secure 20 GPIO_ACTIVE_LOW>;
 			label = "LED0";
 		};
 
 		led1: led_1 {
-			gpios = <&portb 25 GPIO_ACTIVE_LOW>;
+			gpios = <&portb_secure 25 GPIO_ACTIVE_LOW>;
 			label = "LED1";
 		};
 	};
@@ -43,13 +54,13 @@
 		compatible = "gpio-keys";
 
 		button0: button_0 {
-			gpios = <&portb 26 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			gpios = <&portb_secure 26 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "SW0";
 			zephyr,code = <INPUT_KEY_0>;
 		};
 
 		button1: button_1 {
-			gpios = <&portd 2 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			gpios = <&portd_secure 2 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "SW1";
 			zephyr,code = <INPUT_KEY_1>;
 		};
@@ -62,30 +73,43 @@
 		#size-cells = <1>;
 		ranges;
 
+		/*
+		 * MCUboot partition layout for PIC32CK SG01 (128 KB BFM, 2 MB PFM):
+		 *
+		 * Offsets are relative to flash1 base (0x08000000).
+		 * The flash driver uses 0x0C000000 as base_addr.
+		 *
+		 *   slot0:   0x4000000 - 0x40FBFFF  (1008 KB) - primary image
+		 *   slot1:   0x40FC000 - 0x41F7FFF  (1008 KB) - upgrade image
+		 *   storage: 0x41F8000 - 0x41FFFFF  (32 KB)   - scratch / NV storage
+		 */
+
+		/* 128kB for boot partition */
 		boot_partition: partition@0 {
-			label = "boot_flash";
 			compatible = "zephyr,mapped-partition";
-			reg = <0x0 DT_SIZE_K(128)>;
-		};
-	};
-};
-
-&flash1 {
-	partitions {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		ranges;
-
-		code_partition: partition@0 {
-			label = "program_flash";
-			compatible = "zephyr,mapped-partition";
-			reg = <0x0 DT_SIZE_K(2032)>;
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(128)>;
 		};
 
-		storage_partition: partition@1fc000 {
+		/* 1008kB for slot0 partition */
+		slot0_partition: partition@4000000 {
+			compatible = "zephyr,mapped-partition";
+			label = "image-0";
+			reg = <0x04000000 DT_SIZE_K(1008)>;
+		};
+
+		/* 1008kB for slot1 partition */
+		slot1_partition: partition@40fc000 {
+			compatible = "zephyr,mapped-partition";
+			label = "image-1";
+			reg = <0x040fc000 DT_SIZE_K(1008)>;
+		};
+
+		/* 32kB for storage partition */
+		storage_partition: partition@41f8000 {
+			compatible = "zephyr,mapped-partition";
 			label = "storage";
-			compatible = "zephyr,mapped-partition";
-			reg = <0x1fc000 DT_SIZE_K(16)>;
+			reg = <0x041f8000 DT_SIZE_K(32)>;
 		};
 	};
 };
@@ -124,7 +148,7 @@
 		xosc32k-rtc-clk-selection-en = <1>;
 		xosc32k-cfd-en = <0>;
 		xosc32k-cfd-prescaler = <0>;
-		xosc32k-cfd-switchback-en = <0>;
+		xosc32k-cfd-switchback-en = <1>;
 	};
 
 	dfll48m: dfll48m {
@@ -132,13 +156,13 @@
 		dfll48m-src-gclk = "gclk1";
 		dfll48m-enable = <1>;
 		dfll48m-closed-loop-en = <0>;
-		dfll48m-on-demand-en = <1>;
-		dfll48m-usb-clock-recovery-mode = <1>;
-		dfll48m-wait-lock-en = <1>;
-		dfll48m-quick-lock-dis = <1>;
-		dfll48m-chill-cycle-dis = <1>;
-		dfll48m-lose-lock-en = <1>;
-		dfll48m-stable-freq-en = <1>;
+		dfll48m-on-demand-en = <0>;
+		dfll48m-usb-clock-recovery-mode = <0>;
+		dfll48m-wait-lock-en = <0>;
+		dfll48m-quick-lock-dis = <0>;
+		dfll48m-chill-cycle-dis = <0>;
+		dfll48m-lose-lock-en = <0>;
+		dfll48m-stable-freq-en = <0>;
 		dfll48m-tune-max-step = <1>;
 		dfll48m-multiply-factor = <1>;
 	};
@@ -147,47 +171,54 @@
 		compatible = "microchip,pic32ck-sg-gc-pll";
 
 		pll0: pll0 {
+
 			subsystem = <CLOCK_MCHP_PLL_ID_PLL0>;
 			pll-enable = <1>;
 			pll-on-demand-en = <0>;
 			pll-bandwidth-sel = "bwsel-1";
 			pll-src = "xosc";
 			pll-ref-division-factor = <3>;
-			pll-feedback-divider-factor = <300>; /* VCO = 1200 MHz */
+			pll-feedback-divider-factor = <240>;
 			pll-freq-division-factor-int = <0>;
 			pll-freq-division-factor-rem = <0>;
 
 			pll0out0: pll0out0 {
+
 				subsystem = <CLOCK_MCHP_PLL0_ID_OUT0>;
-				pll-output-division-factor = <10>; /* CPU 1200/10 = 120 MHz */
+				pll-output-division-factor = <8>;
 				pll-output-en = <1>;
 			};
 
 			pll0out1: pll0out1 {
+
 				subsystem = <CLOCK_MCHP_PLL0_ID_OUT1>;
-				pll-output-division-factor = <25>; /* For USBFS 1200/25 = 48 MHz */
+				pll-output-division-factor = <20>; /* 960 MHz / 20 = 48 MHz */
 				pll-output-en = <1>;
 			};
 
 			pll0out2: pll0out2 {
+
 				subsystem = <CLOCK_MCHP_PLL0_ID_OUT2>;
 				pll-output-division-factor = <8>;
 				pll-output-en = <0>;
 			};
 
 			pll0out3: pll0out3 {
+
 				subsystem = <CLOCK_MCHP_PLL0_ID_OUT3>;
 				pll-output-division-factor = <8>;
 				pll-output-en = <0>;
 			};
 
 			pll0out4: pll0out4 {
+
 				subsystem = <CLOCK_MCHP_PLL0_ID_OUT4>;
 				pll-output-division-factor = <8>;
 				pll-output-en = <0>;
 			};
 
 			pll0out5: pll0out5 {
+
 				subsystem = <CLOCK_MCHP_PLL0_ID_OUT5>;
 				pll-output-division-factor = <8>;
 				pll-output-en = <0>;
@@ -226,6 +257,7 @@
 			gclkgen-out-clock-signal = <0>;
 		};
 
+		/* Add GCLK for USB - 48 MHz from PLL0_OUT1 */
 		gclkgen2 {
 			subsystem = <CLOCK_MCHP_GCLKGEN_ID_GEN2>;
 			gclkgen-en = <1>;
@@ -244,6 +276,24 @@
 	gclkperiph: gclkperiph {
 		compatible = "microchip,pic32ck-sg-gc-gclkperiph";
 		#clock-cells = <1>;
+
+		can0 {
+			subsystem = <CLOCK_MCHP_GCLKPERIPH_ID_CAN0>;
+			gclkperiph-src = "gclk0";
+			gclkperiph-en = <1>;
+		};
+
+		usb0 {
+			subsystem = <CLOCK_MCHP_GCLKPERIPH_ID_USB>;
+			gclkperiph-src = "gclk2";
+			gclkperiph-en = <1>;
+		};
+
+		sdhc0 {
+			subsystem = <CLOCK_MCHP_GCLKPERIPH_ID_SDMMC0>;
+			gclkperiph-src = "gclk0";
+			gclkperiph-en = <1>;
+		};
 	};
 
 	mclkcpu: mclkcpu {
@@ -254,13 +304,146 @@
 	mclkperiph: mclkperiph {
 		compatible = "microchip,pic32ck-sg-gc-mclkperiph";
 		#clock-cells = <1>;
+
+		usb0 {
+			subsystem = <CLOCK_MCHP_MCLKPERIPH_ID_USB_APB>;
+			mclk-en = <1>;
+		};
+
+		usbhs0 {
+			subsystem = <CLOCK_MCHP_MCLKPERIPH_ID_USBHS_AHB>;
+			mclk-en = <1>;
+		};
 	};
 };
 
-&portb {
+&tcc1 {
+	compatible = "microchip,tcc-g1-counter";
+	max-bit-width = <32>;
+	prescaler = <8>;
 	status = "okay";
 };
 
-&portd {
+&portb_secure {
 	status = "okay";
+};
+
+&portd_secure {
+	status = "okay";
+};
+
+&sercom4 {
+	compatible = "microchip,sercom-g1-i2c";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <I2C_BITRATE_FAST>;
+	pinctrl-0 = <&sercom4_i2c_default>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	eeprom: eeprom@5e {
+		compatible = "atmel,at24", "atmel,24mac402";
+		reg = <0x5e>;
+		size = <256>;
+		pagesize = <16>;
+		address-width = <8>;
+		timeout = <5>;
+
+		nvmem-layout {
+			compatible = "fixed-layout";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			mac_address: mac-address@9a {
+				reg = <0x9a 6>;
+				#nvmem-cell-cells = <0>;
+			};
+		};
+	};
+};
+
+&sercom5 {
+	compatible = "microchip,sercom-g1-uart";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	current-speed = <115200>;
+	data-bits = <8>;
+	parity = "none";
+	stop-bits = "1";
+	rxpo = <1>;
+	txpo = <0>;
+	pinctrl-0 = <&sercom5_uart_default>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&trng {
+	status = "okay";
+};
+
+&can0 {
+	pinctrl-0 = <&can0_default>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&sercom2 {
+	compatible = "microchip,sercom-g1-spi";
+	dipo = <3>;
+	dopo = <0>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-0 = <&sercom2_spi_default>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&usb0 {
+	pinctrl-0 = <&usb_dc_default>;
+	pinctrl-names = "default";
+	/* USBFS disabled – USBHS (hsusb0) is used as the primary USB device
+	 * controller via the zephyr_udc0 alias below.
+	 */
+	status = "disabled";
+};
+
+zephyr_udc0: &hsusb0 {
+	status = "okay";
+};
+
+&gmac {
+	compatible = "microchip,gmac-g1-eth";
+	pinctrl-0 = <&gmac_rmii>;
+	pinctrl-names = "default";
+
+	nvmem-cells = <&mac_address>;
+	nvmem-cell-names = "mac-address";
+	phy-handle = <&phy>;
+	status = "okay";
+};
+
+&mdio {
+	compatible = "microchip,gmac-g1-mdio";
+	pinctrl-0 = <&mdio_default>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	phy: ethernet-phy@0 {
+		compatible = "ethernet-phy";
+		status = "okay";
+		reg = <0>;
+	};
+};
+
+&sdhc0 {
+	compatible = "microchip,sdhc-g1";
+	pinctrl-0 = <&sdhc0_default>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	disk {
+		compatible = "zephyr,sdmmc-disk";
+		disk-name = "SD";
+		status = "okay";
+	};
 };
