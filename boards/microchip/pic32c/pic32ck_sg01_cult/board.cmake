@@ -3,6 +3,8 @@
 
 board_runner_args(mplab_ipe "--tool" "PKOB4" "--part" "32CK2051SG01144" "--erase" "--verify")
 board_runner_args(jlink "--device=PIC32CK2051SG" "--speed=4000")
+board_runner_args(pyocd "--target=pic32ck2051sg01144")
 
 include(${ZEPHYR_BASE}/boards/common/mplab_ipe.board.cmake)
 include(${ZEPHYR_BASE}/boards/common/jlink.board.cmake)
+include(${ZEPHYR_BASE}/boards/common/pyocd.board.cmake)
